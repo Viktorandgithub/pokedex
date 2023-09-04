@@ -8,7 +8,7 @@ import (
 )
 
 
-func StartRepl(cfg *config){
+func StartRepl(cfg *config, args ...string){
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		fmt.Println("pokedex >")
@@ -19,6 +19,10 @@ func StartRepl(cfg *config){
 			continue
 		}
 		commandName := cleaned[0]
+		args := []string{}
+		if len(cleaned) > 1 {
+			args = cleaned[1:]
+		}
 
 		availiableCommands := getCommands()
 
@@ -28,7 +32,7 @@ func StartRepl(cfg *config){
 			continue 
 		}
 
-		err := command.callback(cfg)
+		err := command.callback(cfg, args...)
 		if err != nil{
 			fmt.Println(err)
 		}
@@ -40,7 +44,7 @@ func StartRepl(cfg *config){
 type cliCommand struct{
 	name string
 	description string
-	callback func(*config) error
+	callback func(*config, ...string) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -62,8 +66,18 @@ func getCommands() map[string]cliCommand {
 		},
 		"mapb": {
 			name:        "mapb",
-			description: "Similar to the map command, however, instead of displaying the next 20 locations, it displays the previous 20 locations. It's a way to go back.",
+			description: "It displays the previous 20 locations. It's a way to go back.",
 			callback:    commandMapb,
+		},
+		"explore": {
+			name:        "explore {location_area}",
+			description: "List the pokemon in a location area",
+			callback:    commandExplore,
+		},
+		"catch": {
+			name:        "catch {pokemon}",
+			description: "Catches the pokemon",
+			callback:    commandCatch,
 		},
 	}
 }
