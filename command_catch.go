@@ -3,25 +3,30 @@ package main
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 )
 
 
 func commandCatch(cfg *config, args ...string) error{
 	if len(args) != 1{
-	return errors.New("no location area provided")
+		return errors.New("no pokemon name provided")
 	}
 
-	locationAreaName := args[0]
+	pokemonName := args[0]
 
-	locationArea, err := cfg.pokeapiClient.GetLocationArea(locationAreaName)
+	catchPokemon, err := cfg.pokeapiClient.CatchPokemon(pokemonName)
 	if err != nil {
 		return err
 	}
-	
+	const threshold = 50
+	randNum := rand.Intn(catchPokemon.BaseExperience)
 
-	fmt.Println("explore:" + locationArea.Name)
-	for _, pokemon := range locationArea.PokemonEncounters{
-		fmt.Printf(" - %s\n", pokemon.Pokemon.Name)
+	if randNum > threshold {
+		return fmt.Errorf("Failed to catch %s!\n", pokemonName)
 	}
- return nil
+
+	cfg.caughtPokemon[pokemonName] = catchPokemon
+	fmt.Printf("%s was caught!\n", pokemonName)
+	
+ 	return nil
 }
